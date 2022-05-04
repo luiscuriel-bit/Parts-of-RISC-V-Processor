@@ -2,18 +2,17 @@
 #define TESTBENCH_H
 
 #include <iostream>
-
 #include <systemc.h>
 
 
 class Testbench : public sc_module {
 public:
-  sc_in<bool> clkIn;
-  sc_in<sc_uint<2>> Ex_ALUOpIn;
-  sc_in<bool> Mem_MemWriteIn, Mem_MemReadIn, Mem_BranchIn;
-  sc_in<bool> Wb_MemtoRegIn, Wb_RegWriteIn, Ex_ALUSrcIn;
 
-  sc_out<sc_int<4>> dir_Out;
+  sc_in<sc_int<32>> numberIn;
+  sc_out<sc_int<32>> send_number_1Out, send_number_2Out;
+  sc_out<sc_int<4>> insOut;
+  sc_in<bool> zeroIn;
+  sc_in<bool> clk;
 
   SC_CTOR(Testbench);
 

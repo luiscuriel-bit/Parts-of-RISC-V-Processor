@@ -11,7 +11,7 @@ public:
 	sc_out<bool> Mem_MemWriteOut, Mem_MemReadOut, Mem_BranchOut;
 	sc_out<bool> Wb_MemtoRegOut, Wb_RegWriteOut;
 
-	sc_in<sc_int<5>> dir_In;
+	sc_in<sc_int<4>> dir_In;
 
 	SC_CTOR(Unidad_Control);
 

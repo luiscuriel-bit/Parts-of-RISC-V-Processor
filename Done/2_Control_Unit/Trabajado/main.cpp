@@ -15,7 +15,7 @@ int sc_main(int argv, char* argc[]) {
   sc_signal<bool> Mem_MemWrite_1, Mem_MemRead_1, Mem_Branch_1;
   sc_signal<bool> Wb_MemtoReg_1, Wb_RegWrite_1, Ex_ALUSrc_1;
 
-  sc_signal<sc_int<5>> dir_1;
+  sc_signal<sc_int<4>> dir_1;
 
   Unidad_Control.Ex_ALUSrcOut(Ex_ALUSrc_1), Unidad_Control.Ex_ALUOpOut(Ex_ALUOp_1);
   Unidad_Control.Mem_MemWriteOut(Mem_MemWrite_1), Unidad_Control.Mem_MemReadOut(Mem_MemRead_1), Unidad_Control.Mem_BranchOut(Mem_Branch_1);
