@@ -12,10 +12,12 @@ public:
 	sc_out<sc_int<32>> adressAdderOut;
 	sc_out<sc_int<32>> adressPC_IF_IDOut;
 	sc_out<sc_int<32>> adressInstructionMemoryOut;
+
 	SC_CTOR(PC);
 
 private:
 	sc_int<32> adress;
+
 	void read();
 	void write();
 };
