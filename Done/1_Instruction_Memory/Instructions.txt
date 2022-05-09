@@ -1,5 +1,4 @@
-add x0, x0, x0
-beq x6, x6, test
-addi x7, x5, 9
-sub x8, x6, x2
-test: or x6, x15, x20
+addi x28, x5, 1000
+sw x15, 32(x9)
+beq x7, x9, test
+test: sw x15, 32(x9)

@@ -33,12 +33,8 @@ InstructionMemory::InstructionMemory(sc_module_name moduleName) : sc_module(modu
 	instructionFile.close();
 
 	SC_METHOD(operation);
-
-	//sensitive << clk;
-	// Se debe hacer un dont_initialize para que se puedan cargar las instrucciones correctamente
-	//dont_initialize();
-
-	sensitive << instructionNumberIn;
+	sensitive << clk;
+	dont_initialize();
 }
 
 void InstructionMemory::list(std::string instruction)
@@ -70,6 +66,11 @@ void InstructionMemory::list(std::string instruction)
 	sc_uint<4> insN = 0;
 	if (aux == "add" or aux == "sub" or aux == "sll" or aux == "srl" or aux == "and" or aux == "or")
 	{
+		// Bits 0 - 3, tipo de instruccion (sc_uint<4>)
+		// Bits 4 - 8, primer registro (sc_uint<5>)
+		// Bits 9 - 13, segundo registro (sc_uint<5>)
+		// Bits 14 - 18, tercer registro (sc_uint<5>)
+
 		std::string aux2(instruction.substr(instruction.find_first_of('x') + 1));
 		sc_uint<5> dir01 = stoi(aux2);
 		std::string aux3(aux2.substr(aux2.find_first_of(',') + 3));
@@ -77,12 +78,13 @@ void InstructionMemory::list(std::string instruction)
 		std::string aux4(aux3.substr(aux3.find_first_of(',') + 3));
 		sc_uint<5> dir03 = stoi(aux4);
 
-		operand = dir01;
-		operand <<= 8;
-		operand += dir02;
-		operand <<= 8;
+		operand <<= 14;
 		operand += dir03;
-		operand <<= 8;
+		operand <<= 5;
+		operand += dir02;
+		operand <<= 5;
+		operand += dir01;
+		operand <<= 4;
 
 		if (aux == "add")
 			insN = 1;
@@ -99,25 +101,35 @@ void InstructionMemory::list(std::string instruction)
 
 		operand += insN;
 		operationOut.write(operand);
+		//  for (int i = 31; i > -1; i--)
+		//  {
+		//  	std::cout << operand[i];
+		//  }
+//				std:: cout << "\n\n\n\n add: " << dir03 << "\n\n\n\n";
 	}
 	else if (aux == "addi" or aux == "slli" or aux == "srli" or aux == "andi" or aux == "ori")
 	{
+		// Bits 0 - 3, tipo de instruccion (sc_uint<4>)
+		// Bits 4 - 8, primer registro (sc_uint<5>)
+		// Bits 9 - 13, segundo registro (sc_uint<5>)
+		// Bits 14 - 31, tercer registro (sc_uint<5>), aquí hay 18 bits de valor inmediato
+
 		std::string aux2(instruction.substr(instruction.find_first_of('x') + 1));
 		sc_uint<5> dir01 = stoi(aux2);
 		std::string aux3(aux2.substr(aux2.find_first_of(',') + 3));
 		sc_uint<5> dir02 = stoi(aux3);
 		std::string aux4(aux3.substr(aux3.find_first_of(',') + 2));
-		//El valor inmediato solo puede ser desde -128 hasta 127
-		sc_int<8> dir03 = stoi(aux4);
+		// El valor inmediato solo puede ser desde -2^17 hasta 2^17 - 1
+		sc_int<18> dir03 = stoi(aux4);
 
-		operand = dir01;
-		operand <<= 8;
-		operand += dir02;
-		operand <<= 8;
-		for (sc_uint<4> i = 0; i < 8; i++)
+		for (sc_uint<5> i = 0; i < 18; i++)
 			operand[i] = dir03[i];
-		operand <<= 8;
+		operand <<= 5;
 
+		operand += dir02;
+		operand <<= 5;
+		operand += dir01;
+		operand <<= 4;
 		if (aux == "addi")
 			insN = 3;
 		else if (aux == "slli")
@@ -131,34 +143,45 @@ void InstructionMemory::list(std::string instruction)
 
 		operand += insN;
 		operationOut.write(operand);
+		//		std:: cout << "\n\n\n\n addi: " << dir03 << "\n\n\n\n";
 	}
-	else if (aux == "lw" or aux == "sw"/* or aux == "jalr"*/)
+	else if (aux == "lw" or aux == "sw" /* or aux == "jalr"*/)
 	{
+
 		std::string aux2(instruction.substr(instruction.find_first_of('x') + 1));
 		sc_uint<5> dir01 = stoi(aux2);
 		std::string aux3(aux2.substr(aux2.find_first_of(',') + 2));
-		//El valor inmediato solo puede ser desde -128 hasta 127
-		sc_int<8> dir02 = stoi(aux3);
+		// El valor inmediato solo puede ser desde -128 hasta 127
+		sc_int<18> dir02 = stoi(aux3);
 		std::string aux4(aux3.substr(aux3.find_first_of('x') + 1));
 		sc_uint<5> dir03 = stoi(aux4);
 
-		operand = dir01;
-		operand <<= 8;
-		for (sc_uint<4> i = 0; i < 8; i++)
+		for (sc_uint<5> i = 0; i < 18; i++)
+		{
 			operand[i] = dir02[i];
-		operand <<= 8;
+//			std::cout <<operand[i];
+		
+		}
+		operand <<= 5;
 		operand += dir03;
-		operand <<= 8;
+		operand <<= 5;
+		operand += dir01;
+		operand <<= 4;
 
 		if (aux == "lw")
 			insN = 8;
 		else if (aux == "sw")
 			insN = 9;
-		//else if (aux == "jalr")
+		// else if (aux == "jalr")
 		//	insN = 16;
 
 		operand += insN;
 		operationOut.write(operand);
+		// for (int i = 31; i > -1; i--)
+		// {
+		// 	std::cout << operand[i];
+		// }
+//		std::cout << "\n\n\n\nlw op: " << dir02 << "\n\n\n\n";
 	}
 	else if (aux == "beq" or aux == "bne")
 	{
@@ -168,10 +191,10 @@ void InstructionMemory::list(std::string instruction)
 		sc_uint<5> dir02 = stoi(aux3);
 
 		std::string aux4(aux3.substr(aux3.find_first_of(',') + 2));
-		sc_int<32> linea = 0;
-		for (sc_int<32> i = 0; i < numberOfInstructions; i++)
+		sc_uint<18> linea = 0;
+		for (sc_uint<18> i = 0; i < numberOfInstructions; i++)
 		{
-			sc_int<32> pos = instructionList[i].find_first_of(':');
+			sc_int<19> pos = instructionList[i].find_first_of(':');
 			if (pos != -1)
 			{
 				std::string temp = instructionList[i].substr(0, pos - 1);
@@ -183,13 +206,13 @@ void InstructionMemory::list(std::string instruction)
 			}
 		}
 
-		operand = dir01;
-		operand <<= 8;
-		operand += dir02;
-		operand <<= 8;
-		for (sc_uint<4> i = 0; i < 8; i++)
+		for (sc_uint<5> i = 0; i < 18; i++)
 			operand[i] = linea[i];
-		operand <<= 8;
+		operand <<= 5;
+		operand += dir02;
+		operand <<= 5;
+		operand += dir01;
+		operand <<= 4;
 
 		if (aux == "beq")
 			insN = 14;

@@ -7,56 +7,53 @@ Testbench::Testbench(sc_module_name moduleName) : sc_module(moduleName), clk("cl
 {
 	SC_THREAD(test);
 	sensitive << clk;
+	dont_initialize();
 }
 
 void Testbench::test()
 {
+	wait();
 	std::cout << " Time    operand1    operand2    operand3    instruction\n";
 	std::cout << "--------------------------------------------------------\n";
 
-
-
-
-	// Si Instruction Memory es sensible a la entrada, la lectura de la linea 0 no la detecta, si no que es la lectura por defecto al principio del programa. Por esto, basta con colocar un wait acá y ya tendremos la lectura de la primera línea. En este caso, el for empezaría a partir de 1 (0 ya lo leyó)
-	wait();
-	for (int i = 31, j = 7; i >= 24; i--, j--)
-		operand1[j] = operationIn.read()[i];
-
-	for (int i = 23, j = 7; i >= 16; i--, j--)
-		operand2[j] = operationIn.read()[i];
-
-	for (int i = 15, j = 7; i >= 8; i--, j--)
-		operand3[j] = operationIn.read()[i];
-
-	for (int i = 7, j = 7; i >= 0; i--, j--)
-		instruction[j] = operationIn.read()[i];
-
-	print();
-
-
-
+	// Si Instruction Memory es sensible a la entrada, la lectura de la linea 0 no la detecta, si no que es la lectura por defecto al principio del programa. Por esto, basta con colocar un wait acï¿½ y ya tendremos la lectura de la primera lï¿½nea. En este caso, el for empezarï¿½a a partir de 1 (0 ya lo leyï¿½)
 
 	for (int i = 1; i < 10; i++)
-	//for (int i = 0; i < 10; i++)
+	// for (int i = 0; i < 10; i++)
 	{
 		instructionNumberOut.write(i);
 		// Al estar sincronizado con reloj, el testbench debe esperar un ciclo completo para obtener respuesta de Instruction Memory, debido a la lectura y escritura sobre los puertos
-		//wait();
-		//wait
+		// wait();
+		// wait
 
 		wait();
 
-		for (int i = 31, j = 7; i >= 24; i--, j--)
-			operand1[j] = operationIn.read()[i];
+		for (sc_uint<3> i = 0; i < 4; i++)
+			instruction[i] = operationIn.read()[i];
 
-		for (int i = 23, j = 7; i >= 16; i--, j--)
-			operand2[j] = operationIn.read()[i];
-		
-		for (int i = 15, j = 7; i >= 8; i--, j--)
-			operand3[j] = operationIn.read()[i];
-		
-		for (int i = 7, j = 7; i >= 0; i--, j--)
-			instruction[j] = operationIn.read()[i];
+		if (instruction == 3 or instruction == 6 or instruction == 7 or instruction == 12 or instruction == 13 or instruction == 8 or instruction == 9 or instruction == 14 or instruction == 15)
+		{
+
+			for (sc_uint<4> i = 4, j = 0; i < 9; i++, j++)
+				operand1[j] = operationIn.read()[i];
+
+			for (sc_uint<4> i = 9, j = 0; i < 14; i++, j++)
+				operand2[j] = operationIn.read()[i];
+
+			for (sc_uint<6> i = 14, j = 0; i < 32; i++, j++)
+				operand3[j] = operationIn.read()[i];
+		}
+		else
+		{
+			for (sc_uint<4> i = 4, j = 0; i < 9; i++, j++)
+				operand1[j] = operationIn.read()[i];
+
+			for (sc_uint<4> i = 9, j = 0; i < 14; i++, j++)
+				operand2[j] = operationIn.read()[i];
+
+			for (sc_uint<5> i = 14, j = 0; i < 19; i++, j++)
+				operand3[j] = operationIn.read()[i];
+		}
 
 		print();
 	}

@@ -2,7 +2,6 @@
 #define UNO_H
 
 #include <iostream>
-
 #include <systemc.h>
 
 class Uno : public sc_module
